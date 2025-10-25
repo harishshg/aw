@@ -75,7 +75,17 @@ const conversationSlice = createSlice({
 
         // Reducer used by URL/Popstate to reset step safely
         setStep: (state, action) => {
-            state.currentStep = action.payload;
+            const newStep = action.payload;
+            state.currentStep = newStep;
+
+            // 🚀 NEW: Truncate history when navigating backwards via URL (popstate)
+            // We find the index of the new step. The history should end just before this step.
+            const historyIndex = state.history.findIndex(entry => entry.step === newStep);
+            if (historyIndex !== -1) {
+                // If the new step is found in history, it means we are re-answering it,
+                // so we truncate the history to remove this step and any subsequent ones.
+                state.history.length = historyIndex;
+            }
         },
     },
 });
